@@ -1,6 +1,6 @@
 # 📱 Flutter E-Commerce Catalog App
 
-A smobile catalog application built with Flutter, featuring real-time API integration, dynamic search functionality, and a complete shopping basket workflow.
+A mobile catalog application built with Flutter, featuring real-time API integration, dynamic search functionality, and a complete shopping basket workflow.
 
 ## 🚀 Key Features
 
@@ -54,3 +54,4 @@ flutter run
 flutter run -d chrome --web-renderer html
 
 ```
+
