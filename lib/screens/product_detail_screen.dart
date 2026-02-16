@@ -1,7 +1,9 @@
+import 'package:catalog_app/screens/basket_screen.dart';
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import 'dart:ui_web' as ui;
 import 'dart:html' as html;
+import '../models/basket.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
@@ -83,8 +85,23 @@ class ProductDetailScreen extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
+                        BasketManager.addToBasket(product);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Added to basket!")),
+                          SnackBar(
+                            content: Text("${product.name} added to basket!"),
+                            duration: const Duration(seconds: 2),
+                            action: SnackBarAction(
+                              label: "GO TO BASKET",
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const BasketScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(

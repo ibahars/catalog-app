@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
 import '../services/api_service.dart';
+import 'basket_screen.dart';
 
 class DiscoverScreen extends StatelessWidget {
   const DiscoverScreen({super.key});
@@ -22,7 +23,12 @@ class DiscoverScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BasketScreen()),
+              );
+            },
             icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
           ),
         ],
