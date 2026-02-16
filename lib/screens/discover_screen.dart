@@ -1,31 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
+import '../services/api_service.dart';
 
 class DiscoverScreen extends StatelessWidget {
   const DiscoverScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<Product> mockProducts = [
-      Product(
-        id: 1,
-        name: "iPhone 13",
-        price: 999.0,
-        description: "Apple device",
-        image: "https://via.placeholder.com/150",
-        category: "Phone",
-      ),
-      Product(
-        id: 2,
-        name: "Laptop",
-        price: 1500.0,
-        description: "Power laptop",
-        image: "https://via.placeholder.com/150",
-        category: "Computer",
-      ),
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -45,27 +27,41 @@ class DiscoverScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: mockProducts.length,
-              itemBuilder: (context, index) {
-                final product = mockProducts[index];
-                return ProductCard(product: product);
-              },
+      body: FutureBuilder<List<Product>>(
+        future: ApiService.getProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text("Hata: ${snapshot.error}"));
+          }
+
+          // Veri geldi ama liste boş mu?
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text("Ürünler yüklenemedi veya liste boş."),
+            );
+          }
+
+          // Veri var, listele:
+          final products = snapshot.data!;
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7, // Kart boyutu için biraz pay bırakalım
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
             ),
-          ),
-        ],
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              return ProductCard(product: products[index]);
+            },
+          );
+        },
       ),
     );
   }
 }
-
