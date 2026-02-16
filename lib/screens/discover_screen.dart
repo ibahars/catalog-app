@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
-import '../services/api_service.dart';
 import 'basket_screen.dart';
 
 class DiscoverScreen extends StatelessWidget {
@@ -10,6 +10,7 @@ class DiscoverScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           "Discover",
@@ -22,6 +23,18 @@ class DiscoverScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // Arama Butonu
+          IconButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Search functionality coming soon!"),
+                ),
+              );
+            },
+            icon: const Icon(Icons.search, color: Colors.black),
+          ),
+          // Sepet Butonu
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -33,40 +46,56 @@ class DiscoverScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: FutureBuilder<List<Product>>(
-        future: ApiService.getProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text("Hata: ${snapshot.error}"));
-          }
-
-          // Veri geldi ama liste boş mu?
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text("Ürünler yüklenemedi veya liste boş."),
-            );
-          }
-
-          // Veri var, listele:
-          final products = snapshot.data!;
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.7, // Kart boyutu için biraz pay bırakalım
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
+      body: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(16),
+            height: 80,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+              image: const DecorationImage(
+                image: AssetImage('assets/banner.png'),
+                fit: BoxFit.contain,
+              ),
             ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              return ProductCard(product: products[index]);
-            },
-          );
-        },
+          ),
+
+          Expanded(
+            child: FutureBuilder<List<Product>>(
+              future: ApiService.getProducts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No products found."));
+                }
+
+                final products = snapshot.data!;
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return ProductCard(product: products[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

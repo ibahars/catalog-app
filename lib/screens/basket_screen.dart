@@ -46,7 +46,7 @@ class BasketScreen extends StatelessWidget {
                     itemCount: BasketManager.basketItems.length,
                     itemBuilder: (context, index) {
                       final item = BasketManager.basketItems[index];
-                      final String viewId = 'basket-img-${item.id}-${index}';
+                      final String viewId = 'basket-img-${item.id}-$index';
                       registerBasketImage(item.image, viewId);
 
                       return ListTile(
