@@ -4,37 +4,57 @@ import '../models/product.dart';
 import '../widgets/product_card.dart';
 import 'basket_screen.dart';
 
-class DiscoverScreen extends StatelessWidget {
+class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
 
+  @override
+  State<DiscoverScreen> createState() => _DiscoverScreenState();
+}
+
+class _DiscoverScreenState extends State<DiscoverScreen> {
+  String searchQuery = "";
+  bool isSearching = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          "Discover",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         backgroundColor: Colors.white,
         elevation: 0,
+        title: !isSearching
+            ? const Text(
+                "Discover",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                ),
+              )
+            : TextField(
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: "Search products...",
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                  });
+                },
+              ),
         actions: [
-          // Arama Butonu
           IconButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Search functionality coming soon!"),
-                ),
-              );
+              setState(() {
+                isSearching = !isSearching;
+                if (!isSearching) searchQuery = "";
+              });
             },
-            icon: const Icon(Icons.search, color: Colors.black),
+            icon: Icon(
+              isSearching ? Icons.close : Icons.search,
+              color: Colors.black,
+            ),
           ),
-          // Sepet Butonu
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -54,7 +74,6 @@ class DiscoverScreen extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
               image: const DecorationImage(
                 image: AssetImage('assets/banner.png'),
                 fit: BoxFit.contain,
@@ -66,19 +85,18 @@ class DiscoverScreen extends StatelessWidget {
             child: FutureBuilder<List<Product>>(
               future: ApiService.getProducts(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting)
                   return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
+                if (snapshot.hasError)
                   return Center(child: Text("Error: ${snapshot.error}"));
-                }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                final products = snapshot.data!.where((p) {
+                  return p.name.toLowerCase().contains(searchQuery);
+                }).toList();
+
+                if (products.isEmpty)
                   return const Center(child: Text("No products found."));
-                }
 
-                final products = snapshot.data!;
                 return GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -88,9 +106,8 @@ class DiscoverScreen extends StatelessWidget {
                     mainAxisSpacing: 16,
                   ),
                   itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    return ProductCard(product: products[index]);
-                  },
+                  itemBuilder: (context, index) =>
+                      ProductCard(product: products[index]),
                 );
               },
             ),
